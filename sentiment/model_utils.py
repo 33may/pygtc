@@ -23,16 +23,11 @@ def load_model_embed():
     return model_embed
 
 
-tokenizer = load_tokenizer()
-model_classification = load_classification_model()
-model_embed = load_model_embed()
-
-
-def load_classification_pipeline():
+def load_classification_pipeline(model, tokenizer):
     # build pipeline
     finbert = pipeline(
         "sentiment-analysis",
-        model=model_classification,
+        model=model,
         tokenizer=tokenizer,
     )
     return finbert
@@ -43,15 +38,15 @@ def enc_device(enc):
        enc[k] = v.to(device) 
 
 
-def embed(text):
+def embed(text, model, tokenizer):
     enc = tokenizer(text, return_tensors="pt", truncation=True, max_length=256)
 
     enc_device(enc)
 
     with torch.no_grad():
-        out = model_embed(**enc)
+        out = model(**enc)
         return out.last_hidden_state[:, 0, :]
     
-    
+
 def cosine(a, b):
     return F.cosine_similarity(a, b).item()
